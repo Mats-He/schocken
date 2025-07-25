@@ -552,7 +552,7 @@ class BasePlayer(ABC):
         self.hand.finalize()
 
         # print(f"\tFinal Hand: {self.hand.dice}")
-        return self.hand
+        return self.hand.copy()
 
     @staticmethod
     def _throw_new_hand(
