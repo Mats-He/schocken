@@ -1,7 +1,7 @@
 try:
     from schocken.custom_player import Player
     from schocken.game import Game
-except ImportError:
+except ModuleNotFoundError:
     from src.schocken.custom_player import Player
     from src.schocken.game import Game
 

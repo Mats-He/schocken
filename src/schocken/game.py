@@ -1,5 +1,5 @@
 from typing import Union, List, Optional
-from src.schocken.base import (
+from schocken.base import (
     HandType,
     BasePlayer,
     PlayerID,

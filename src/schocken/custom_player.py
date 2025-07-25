@@ -1,4 +1,4 @@
-from src.schocken.base import BasePlayer
+from schocken.base import BasePlayer
 
 
 class Player(BasePlayer):
