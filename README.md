@@ -27,7 +27,7 @@ Schocken is a modern Python implementation of the traditional dice game "Schocke
    .venv\Scripts\activate # Windows
     ```
 
-3. Install dependencies (*currently in v0.0.1, no external dependencies are required*):
+3. (Optional) Install this repo as a pip package (*currently in v0.0.1, no external dependencies are required*):
    ```bash
    pip install -r requirements.txt
    ```
