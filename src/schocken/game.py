@@ -189,7 +189,7 @@ class Game:
         self,
         halves_index=0,
         players: Union[List[BasePlayer], None] = None,
-        _print_info: bool = False,
+        print_info: bool = False,
     ) -> Half:
         """
         Play a half of the game, consisting of multiple mini-rounds.
@@ -239,7 +239,7 @@ class Game:
             players = players[n:] + players[:n]
             return players
 
-        if _print_info:
+        if print_info:
             print(f"\tPlaying half {halves_index}")
 
         half = Half(halves_index=halves_index)
@@ -283,7 +283,7 @@ class Game:
                 half.mini_rounds.append(mr)
                 self.last_mr = mr
                 mini_round_index += 1
-                if _print_info:
+                if print_info:
                     print(
                         f"\t\tSchock out! by {self.get_player_by_id(mr.best_turn.player_id).name}."
                     )
@@ -324,7 +324,8 @@ class Game:
             for pid, chips in half.chip_manager.chip_balances.items():
                 if chips == 13:
                     half.lost_by = pid
-                    print("\t\tHalf ended regularly")
+                    if print_info:
+                        print("\t\tHalf ended regularly")
                 elif chips > 13 or chips < 0:
                     raise ValueError(
                         f"Player {pid} has {chips}, which should not be possible."
@@ -332,7 +333,7 @@ class Game:
 
             mini_round_index += 1
 
-        if _print_info:
+        if print_info:
             print(
                 f"\t\t-> Half ended after {mini_round_index} rounds. {self.get_player_by_id(half.lost_by).name} lost."
             )
@@ -360,7 +361,7 @@ class Game:
         halves_lost_by = []
 
         for halves_index in range(2):
-            half = self.play_half(halves_index, _print_info=_print_info)
+            half = self.play_half(halves_index, print_info=_print_info)
             r.halves.append(half)
             halves_lost_by.append(half.lost_by)
 

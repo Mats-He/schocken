@@ -44,7 +44,7 @@ python main.py
 ```
 
 In the example, you will see output showing:
-- "Live" updates of a game, (if `_print_info=True`)
+- "Live" updates of a game, (if `print_info=True`)
 - Final scores and statistics
 
 ### Live Updates
