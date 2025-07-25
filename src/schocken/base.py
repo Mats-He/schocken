@@ -1,7 +1,7 @@
 import random
 from dataclasses import dataclass, field
 from functools import total_ordering
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 from abc import ABC, abstractmethod
 
 
@@ -165,7 +165,7 @@ class HandType:
 @total_ordering
 class Hand:
     _dice: List[Die] = field(default_factory=list)
-    _hand_type: HandType = field(default=None, init=False, repr=False)
+    _hand_type: Optional[HandType] = field(default=None, init=False, repr=False)
     put_together: bool = False
     players_turn_ind: int = (
         0  # index of the players turn in the game, e.g. 1 (1st player), 2 (2nd player)
@@ -212,7 +212,9 @@ class Hand:
         )
 
     @staticmethod
-    def get_all_possible_hands(return_names: bool = False) -> List["Hand"]:
+    def get_all_possible_hands(
+        return_names: bool = False,
+    ) -> Union[List["Hand"], List[str]]:
         """
         Returns all possible unique hands sorted by rank (worst to best).
         Useful for generating all hand types for game logic, testing, or statistics.
@@ -294,6 +296,8 @@ class Hand:
 
     @property
     def hand_type(self) -> HandType:
+        if self._hand_type is None:
+            return HandType()  # Return a default HandType if not set
         return self._hand_type
 
     @hand_type.setter
@@ -519,13 +523,22 @@ class BasePlayer(ABC):
         """
         return False, self._throw_new_hand(current_hand)
 
-    def play_turn(self, _print_throws: bool = False, **kwargs) -> Hand:
-        """_summary_
+    def play_turn(
+        self,
+        max_throws: int = 3,
+        _print_throws: bool = False,
+        **kwargs,
+    ) -> Tuple[Hand, int]:
+        """Play a turn for the player, evaluating the current hand and potentially throwing again.
 
         Args:
-            game (Game, optional): Current game state for evaluation of other players actions and hands. Defaults to None.
+            max_throws (int, optional): Maximum number of throws allowed in a turn. Defaults to 3.
+            _print_throws (bool, optional): Whether to print the throws during the turn. Defaults to False.
+            **kwargs: Additional keyword arguments (unused).
+
+        Returns:
+            Tuple[Hand, int]: The final hand after the turn and the number of throws made
         """
-        max_throws = 3  # TODO: max_throws to come from current game instance/state
         self.throw_count = 1
         self.hand.initialize()
         if _print_throws:
@@ -552,7 +565,7 @@ class BasePlayer(ABC):
         self.hand.finalize()
 
         # print(f"\tFinal Hand: {self.hand.dice}")
-        return self.hand.copy()
+        return self.hand.copy(), self.throw_count
 
     @staticmethod
     def _throw_new_hand(

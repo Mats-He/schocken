@@ -169,9 +169,11 @@ class Game:
             raise ValueError(
                 f"Too little or too many players to play round ({len(mr.mini_round_players)})."
             )
-
+        max_throws = 3
         for i, player in enumerate(mr.mini_round_players):
-            final_hand = player.play_turn(game=self)
+            final_hand, num_throws = player.play_turn(max_throws=max_throws, game=self)
+            if i == 0:
+                max_throws = num_throws  # use max throws of first player
             final_hand.players_turn_ind = i
             turn = Turn(turn_index=i, player_id=player.id, final_hand=final_hand)
             mr.turns.append(turn)

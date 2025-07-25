@@ -29,11 +29,11 @@ Schocken is a modern Python implementation of the traditional dice game "Schocke
 
 3. Install this repo as a pip package (*currently in v0.0.1, no external dependencies are required*):
    ```bash
-   pip install -r requirements.txt
+   pip install . # or pip install -r requirements.txt
    ```
    or with uv:
    ```bash
-   uv pip install -r requirements.txt
+   uv pip install . # or uv pip install -r requirements.txt
     ```
 
 ## Usage
