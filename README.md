@@ -11,7 +11,7 @@ Schocken is a Python implementation of the traditional dice game "Schocken". Thi
 ## Installation
 1. Clone the repository:
    ```bash
-   git clone <repo-url>
+   git clone https://github.com/Mats-He/schocken
    cd schocken
    ```
 2. (Optional) Create and activate a virtual environment:
