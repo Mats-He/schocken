@@ -1,0 +1,7 @@
+[project]
+name = "schocken"
+version = "0.0.1"
+description = "Python implementation of the dice game Schocken (German)"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []

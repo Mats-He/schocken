@@ -1,0 +1,101 @@
+Metadata-Version: 2.4
+Name: schocken
+Version: 0.1.0
+Summary: Python implementation of the dice game Schocken (German)
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Dynamic: license-file
+
+# Schocken
+
+Schocken is a Python implementation of the traditional dice game "Schocken". This project provides a modular and extensible framework for simulating the game, including custom player strategies and detailed game statistics.
+
+## Features
+- Play the Schocken dice game with multiple players
+- Easily add custom player strategies
+- Track detailed game statistics (rounds, halves, mini-rounds, turns)
+- Extensible codebase for further development
+
+## Installation
+1. Clone the repository:
+   ```bash
+   git clone <repo-url>
+   cd schocken
+   ```
+2. (Optional) Create and activate a virtual environment:
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate
+   ```
+3. Install dependencies (if any):
+   ```bash
+   pip install -r requirements.txt
+   ```
+   *(Note: If no requirements.txt is present, dependencies are minimal.)*
+
+## Usage
+In oder to start a Schocken game, players and a game instance need to be created.
+An example usage can be found in the main script:
+```bash
+python main.py
+```
+
+You will see output showing:
+- "Live" updates of a game, if enabled
+- Final scores and statistics
+
+The "live" updates are print messages that look like this:
+```
+Playing round 0
+        Playing half 0
+                Schock out! by Bob.
+                -> Half ended after 4 rounds. Alice lost.
+        Playing half 1
+                Schock out! by Bob.
+                -> Half ended after 2 rounds. Carol lost.
+                Half ended regularly
+-> Final between Alice and Carol lost by Carol.
+
+Playing round 1
+        Playing half 0
+                Schock out! by Alice.
+                -> Half ended after 1 rounds. Bob lost.
+        Playing half 1
+                Schock out! by Carol.
+                -> Half ended after 2 rounds. Bob lost.
+Round lost clean by Bob
+```
+
+## Open Points
+- game.py: Implement async functionality for real-time multiplayers
+- Add a GUI/web interface for real-time multiplayer interaction/visualization
+- Add a rulebook for the current implementation of the game (there might exist multiple variants of the game)
+
+## Project Structure
+```
+main.py                # Entry point for running the game
+src/schocken/          # Core game logic and player classes
+    base.py            # Abstract base player class
+    custom_player.py   # Example custom player implementation
+    game.py            # Game logic and management
+    __init__.py        # Package initialization
+    __pycache__/       # Python cache files
+
+LICENSE                # License information
+pyproject.toml         # Project metadata
+README.md              # Project documentation
+
+tests/                 # Unit tests for game logic
+    test_base.py       # Tests for base player
+    test_game.py       # Tests for game logic
+    test_hands.py      # Tests for hand evaluation
+    __init__.py        # Test package initialization
+    __pycache__/       # Test cache files
+```
+
+## Customization
+You can create your own player strategies by subclassing the `BasePlayer` class in `base.py`. See `custom_player.py` for an example.
+
+## License
+This project is licensed under the MIT License. See `LICENSE` for details.

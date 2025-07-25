@@ -1,0 +1,14 @@
+LICENSE
+README.md
+pyproject.toml
+src/schocken/__init__.py
+src/schocken/base.py
+src/schocken/custom_player.py
+src/schocken/game.py
+src/schocken.egg-info/PKG-INFO
+src/schocken.egg-info/SOURCES.txt
+src/schocken.egg-info/dependency_links.txt
+src/schocken.egg-info/top_level.txt
+tests/test_base.py
+tests/test_game.py
+tests/test_hands.py
