@@ -1,7 +1,8 @@
 Metadata-Version: 2.4
 Name: schocken
-Version: 0.1.0
+Version: 0.0.1
 Summary: Python implementation of the dice game Schocken (German)
+Author: Mats H
 Requires-Python: >=3.11
 Description-Content-Type: text/markdown
 License-File: LICENSE
@@ -12,10 +13,10 @@ Dynamic: license-file
 Schocken is a Python implementation of the traditional dice game "Schocken". This project provides a modular and extensible framework for simulating the game, including custom player strategies and detailed game statistics.
 
 ## Features
-- Play the Schocken dice game with multiple players
+- Simulate the Schocken dice game with multiple players
 - Easily add custom player strategies
-- Track detailed game statistics (rounds, halves, mini-rounds, turns)
-- Extensible codebase for further development
+- Track detailed game statistics (rounds, halves, mini-rounds, turns/throws)
+- Extensible codebase for further development/analysis
 
 ## Installation
 1. Clone the repository:
@@ -23,28 +24,23 @@ Schocken is a Python implementation of the traditional dice game "Schocken". Thi
    git clone <repo-url>
    cd schocken
    ```
-2. (Optional) Create and activate a virtual environment:
+2. Install dependencies (*currently in v0.0.1, no external dependencies are required*):
    ```bash
-   python3 -m venv venv
-   source venv/bin/activate
+   pip install .
    ```
-3. Install dependencies (if any):
-   ```bash
-   pip install -r requirements.txt
-   ```
-   *(Note: If no requirements.txt is present, dependencies are minimal.)*
 
 ## Usage
 In oder to start a Schocken game, players and a game instance need to be created.
-An example usage can be found in the main script:
+An example usage can be found in the main script. It can be run with:
 ```bash
 python main.py
 ```
 
 You will see output showing:
-- "Live" updates of a game, if enabled
+- "Live" updates of a game, (if `_print_info=True`)
 - Final scores and statistics
 
+### Live Updates
 The "live" updates are print messages that look like this:
 ```
 Playing round 0
@@ -66,6 +62,23 @@ Playing round 1
                 -> Half ended after 2 rounds. Bob lost.
 Round lost clean by Bob
 ```
+### Final Scores & Statistics
+Among others, the scores and statistics look like this:
+```
+Final Scores:
+['rounds_lost', 'halves_lost', 'minirounds_lost', 'hands_played']
+Total rounds lost by players: {'Alice': 1, 'Bob': 0, 'Carol': 2}
+
+Major game objects and their properties:
+Rounds: ['round_index', 'halves', 'lost_by']
+Halves: ['halves_index', 'active_players', 'mini_rounds', 'lost_by', 'stock_chips_gone', 'chip_manager']
+Mini-rounds: ['mini_round_players', 'mini_round_index', 'turns', 'worst_turn', 'best_turn', 'given_chips', 'lost_by']
+Turns: ['turn_index', 'player_id', 'final_hand']
+```
+## Design Decisions
+- The game class (`Game`) manages the game flow, including rounds, halves, and mini-rounds and points. The player class (`BasePlayer`) only defines the interface for player strategies, the rest is taken care of by the game instance. Thus, scores, points, chips etc. are all part of the game or its related data objects (Round, Half, Turn etc.) and not the player instances.
+- The game was build for the main purpose of simulation and analysis. It is therefore at this point not designed for real-time interaction, but rather for running simulations and analyzing the results.
+- The player logic is designed to be extensible, allowing for custom player strategies by subclassing the `BasePlayer` class. This allows for easy integration of different player behaviors without modifying the core 
 
 ## Open Points
 - game.py: Implement async functionality for real-time multiplayers

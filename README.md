@@ -14,19 +14,36 @@ Schocken is a Python implementation of the traditional dice game "Schocken". Thi
    git clone <repo-url>
    cd schocken
    ```
-2. (Optional) Install dependencies (*currently in v0.0.1, no external dependencies are required*):
+2. (Optional) Create and activate a virtual environment:
    ```bash
-   pip install -r requirements.txt
+   python -m venv .venv
+   source .venv/bin/activate # Linux/macOS
+   .venv\Scripts\activate # Windows
    ```
+   or with uv:
+   ```bash
+   uv venv
+   source .venv/bin/activate # Linux/macOS
+   .venv\Scripts\activate # Windows
+    ```
+
+3. Install dependencies (*currently in v0.0.1, no external dependencies are required*):
+   ```bash
+   pip install .
+   ```
+   or with uv:
+   ```bash
+   uv pip install .
+    ```
 
 ## Usage
-In oder to start a Schocken game, players and a game instance need to be created.
+In oder to simulate a Schocken game, at least two players and a game instance need to be created.
 An example usage can be found in the main script. It can be run with:
 ```bash
 python main.py
 ```
 
-You will see output showing:
+In the example, you will see output showing:
 - "Live" updates of a game, (if `_print_info=True`)
 - Final scores and statistics
 
@@ -55,11 +72,11 @@ Round lost clean by Bob
 ### Final Scores & Statistics
 Among others, the scores and statistics look like this:
 ```
-Final Scores:
+Available statistics:
 ['rounds_lost', 'halves_lost', 'minirounds_lost', 'hands_played']
 Total rounds lost by players: {'Alice': 1, 'Bob': 0, 'Carol': 2}
 
-Major game objects and their properties:
+Major game objects and their properties (for detailed analysis):
 Rounds: ['round_index', 'halves', 'lost_by']
 Halves: ['halves_index', 'active_players', 'mini_rounds', 'lost_by', 'stock_chips_gone', 'chip_manager']
 Mini-rounds: ['mini_round_players', 'mini_round_index', 'turns', 'worst_turn', 'best_turn', 'given_chips', 'lost_by']

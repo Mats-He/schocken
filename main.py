@@ -1,5 +1,5 @@
-from src.schocken.custom_player import Player
-from src.schocken.game import Game
+from schocken.custom_player import Player
+from schocken.game import Game
 
 
 def main():
@@ -27,7 +27,7 @@ def main():
 
     # Get the final scores after all rounds
     scores = game.get_scores()
-    print("\nFinal Scores:")
+    print("\nAvailable statistics:")
     print(list(scores.keys()))
     print(f"Total rounds lost by players: {scores['rounds_lost']}")
 
