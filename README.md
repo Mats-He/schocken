@@ -1,6 +1,6 @@
 # Schocken
 
-Schocken is a Python implementation of the traditional dice game "Schocken". This project provides a modular and extensible framework for simulating the game, including custom player strategies and detailed game statistics.
+Schocken is a modern Python implementation of the traditional dice game "Schocken". This project provides a modular and extensible framework for simulating the game, including custom player strategies and detailed game statistics.
 
 ## Features
 - Simulate the Schocken dice game with multiple players
