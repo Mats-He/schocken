@@ -36,15 +36,43 @@ Schocken is a modern Python implementation of the traditional dice game "Schocke
    uv pip install . # or uv pip install -r requirements.txt
     ```
 
-## Usage
+## Basic Usage
 In oder to simulate a Schocken game, at least two players and a game instance need to be created.
+After creation, the players have to be added to the game instance.
+```python
+from schocken.game import Game
+from schocken.custom_player import Player
+
+# Create a game instance and players
+game = Game()
+p1 = Player("Alice")
+p2 = Player("Bob")
+p3 = Player("Carol")
+
+# Add players to the game
+game.add_player([p1, p2, p3])
+```
+The game is organized in units called rounds, halves, mini-rounds and turns.
+- **Turn**: A turn represents a players turn, i.e. the smallest unit of the game flow. Each turn is connected to exactly one player. In their turn, players can make 1 to 3 throws with the dice. At the end of the turn there is a final hand for the player.
+- **Mini-round**: In a mini-round, all players have exactly one turn. The player with the worst final hand loses the mini-round and gets penalty chips corresponding to the best final hand of that mini-round.
+- **Half**: A half consists of multiple mini-rounds. It either ends when a player has all penalty chips or when a Schock-out was thrown.
+- **Round**: A round consists of two regular halves and an optional final third half. The round ends when either one player has lost both regular halves or when when the final half was played and one player has lost it.
+
+All units can be played individually, however, the default would be to play an arbitrary number of rounds.
+```python
+r = game.play_round()
+h = game.play_half()
+mr = game.play_mini_round()
+t = p1.play_turn()
+```
+
 An example usage can be found in the main script. It can be run with:
 ```bash
 python main.py
 ```
 
 In the example, you will see output showing:
-- "Live" updates of a game, (if `print_info=True`)
+- "Live" updates of a game, (if `print_info=True` in the `play_round()` method)
 - Final scores and statistics
 
 ### Live Updates
@@ -82,10 +110,11 @@ Halves: ['halves_index', 'active_players', 'mini_rounds', 'lost_by', 'stock_chip
 Mini-rounds: ['mini_round_players', 'mini_round_index', 'turns', 'worst_turn', 'best_turn', 'given_chips', 'lost_by']
 Turns: ['turn_index', 'player_id', 'final_hand']
 ```
+
 ## Design Decisions
-- The game class (`Game`) manages the game flow, including rounds, halves, and mini-rounds and points. The player class (`BasePlayer`) only defines the interface for player strategies, the rest is taken care of by the game instance. Thus, scores, points, chips etc. are all part of the game or its related data objects (Round, Half, Turn etc.) and not the player instances.
-- The game was build for the main purpose of simulation and analysis. It is therefore at this point not designed for real-time interaction, but rather for running simulations and analyzing the results.
-- The player logic is designed to be extensible, allowing for custom player strategies by subclassing the `BasePlayer` class. This allows for easy integration of different player behaviors without modifying the core 
+- The game class (`Game`) manages the game flow, including rounds, halves, mini-rounds and points. The player class (`BasePlayer`) only defines the interface for player strategies, the rest is taken care of by the game instance. Thus, scores, points, chips etc. are all part of the game or its related data objects (Round, Half, Turn etc.) and not the player instances.
+- The game was built for the main purpose of simulation and analysis. It is therefore at this point not designed for real-time interaction, but rather for running simulations and analyzing the results.
+- The player logic is designed to be extensible, allowing for custom player strategies by subclassing the `BasePlayer` class. This allows for easy integration of different player behaviors without modifying the core. 
 
 ## Open Points
 - game.py: Implement async functionality for real-time multiplayers

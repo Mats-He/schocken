@@ -146,15 +146,17 @@ class Game:
         return scores
 
     def play_mini_round(
-        self, mini_round_players: List[BasePlayer], mini_round_index: int = 0
+        self,
+        mini_round_players: Optional[List[BasePlayer]] = None,
+        mini_round_index: int = 0,
     ) -> MiniRound:
         """
         Play a single mini-round with the given players.
         Each player takes one turn, and the results are recorded.
 
         Args:
-            mini_round_players (List[BasePlayer]): The players participating in the mini-round.
-            mini_round_index (int): The index of the mini-round within the half.
+            mini_round_players (List[BasePlayer], optional): The players participating in the mini-round.
+            mini_round_index (int, optional): The index of the mini-round within the half.
 
         Returns:
             MiniRound: The completed MiniRound object with results.
@@ -162,6 +164,9 @@ class Game:
         Raises:
             ValueError: If the number of players is not within the allowed range.
         """
+        if not mini_round_players:
+            mini_round_players = self.players.copy()
+
         mr = MiniRound(
             mini_round_players=mini_round_players, mini_round_index=mini_round_index
         )
@@ -171,11 +176,10 @@ class Game:
             )
         max_throws = 3
         for i, player in enumerate(mr.mini_round_players):
-            final_hand, num_throws = player.play_turn(max_throws=max_throws, game=self)
+            turn = player.play_turn(max_throws=max_throws, turn_index=i, game=self)
             if i == 0:
-                max_throws = num_throws  # use max throws of first player
-            final_hand.players_turn_ind = i
-            turn = Turn(turn_index=i, player_id=player.id, final_hand=final_hand)
+                max_throws = turn.num_throws  # use max throws of first player
+            turn.final_hand.players_turn_ind = i
             mr.turns.append(turn)
 
         # determine winner, loser and chips

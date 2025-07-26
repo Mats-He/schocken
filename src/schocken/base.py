@@ -489,6 +489,14 @@ class PlayerID:
         return self._id
 
 
+@dataclass(order=True)
+class Turn:
+    turn_index: int = field(default=0, compare=False)
+    player_id: Optional[PlayerID] = field(default=None, compare=False)
+    final_hand: Optional[Hand] = field(default=None, compare=True)
+    num_throws: int = field(default=0, compare=False)
+
+
 class BasePlayer(ABC):
     def __init__(self, name: str):
         self.name: str = name
@@ -526,18 +534,20 @@ class BasePlayer(ABC):
     def play_turn(
         self,
         max_throws: int = 3,
+        turn_index: int = 0,
         _print_throws: bool = False,
         **kwargs,
-    ) -> Tuple[Hand, int]:
+    ) -> Turn:
         """Play a turn for the player, evaluating the current hand and potentially throwing again.
 
         Args:
             max_throws (int, optional): Maximum number of throws allowed in a turn. Defaults to 3.
+            turn_index (int, optional): Index of players turn, i.e. first, second player to play etc.
             _print_throws (bool, optional): Whether to print the throws during the turn. Defaults to False.
             **kwargs: Additional keyword arguments (unused).
 
         Returns:
-            Tuple[Hand, int]: The final hand after the turn and the number of throws made
+            Turn: The final hand after the turn and the number of throws made
         """
         self.throw_count = 1
         self.hand.initialize()
@@ -564,8 +574,12 @@ class BasePlayer(ABC):
         # Finalize the hand after all turns
         self.hand.finalize()
 
-        # print(f"\tFinal Hand: {self.hand.dice}")
-        return self.hand.copy(), self.throw_count
+        return Turn(
+            player_id=self.id,
+            final_hand=self.hand.copy(),
+            num_throws=self.throw_count,
+            turn_index=turn_index,
+        )
 
     @staticmethod
     def _throw_new_hand(
@@ -698,13 +712,6 @@ class BasePlayer(ABC):
 class ChipManager:
     chips_in_stock: int = 13
     chip_balances: dict = field(default_factory=dict)
-
-
-@dataclass(order=True)
-class Turn:
-    turn_index: int = field(default=0, compare=False)
-    player_id: Optional[PlayerID] = field(default=None, compare=False)
-    final_hand: Optional[Hand] = field(default=None, compare=True)
 
 
 @dataclass
