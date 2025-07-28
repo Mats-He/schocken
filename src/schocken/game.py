@@ -415,6 +415,5 @@ class Game:
         for i in range(num_rounds):
             r = self.play_round(round_index=i, print_info=print_info)
             rounds.append(r)
-            self.rounds.append(r)
-
+        self.rounds.extend(rounds)
         return rounds
