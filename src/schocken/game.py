@@ -385,6 +385,7 @@ class Game:
                 next(p for p in self.players if p.id == pid) for pid in halves_lost_by
             ]
             half = self.play_half(2, players=final_players)
+            r.halves.append(half)
             r.lost_by = half.lost_by
             if print_info:
                 print(
