@@ -204,7 +204,7 @@ class Game:
         Args:
             halves_index (int): The index of the half (0, 1, or 2 for tiebreaker).
             players (List[BasePlayer], optional): The players participating in this half. If None, all players are included.
-            _print_info (bool): Whether to print detailed information about the half.
+            print_info (bool): Whether to print detailed information about the half.
 
         Returns:
             Half: The completed Half object with all mini-rounds and results.
@@ -345,14 +345,14 @@ class Game:
             )
         return half
 
-    def play_round(self, round_index=0, _print_info: bool = False):
+    def play_round(self, round_index=0, print_info: bool = False):
         """
         Play a full round of the game, consisting of two (or three) halves.
         Determines the overall round loser and updates the game state.
 
         Args:
             round_index (int): The index of the round.
-            _print_info (bool): Whether to print detailed information about the round.
+            print_info (bool): Whether to print detailed information about the round.
 
         Returns:
             Round: The completed Round object with all halves and results.
@@ -360,14 +360,14 @@ class Game:
         Raises:
             ValueError: If the round logic fails or player selection is invalid.
         """
-        if _print_info:
+        if print_info:
             print(f"Playing round {round_index}")
 
         r = Round(round_index)
         halves_lost_by = []
 
         for halves_index in range(2):
-            half = self.play_half(halves_index, print_info=_print_info)
+            half = self.play_half(halves_index, print_info=print_info)
             r.halves.append(half)
             halves_lost_by.append(half.lost_by)
 
@@ -376,7 +376,7 @@ class Game:
         if len(set(halves_lost_by)) == 1:
             # player lost both rounds, so they lost entire round
             r.lost_by = halves_lost_by[0]
-            if _print_info:
+            if print_info:
                 print(f"Round lost clean by {self.get_player_by_id(r.lost_by).name}\n")
         elif len(set(halves_lost_by)) == 2:
             # play third half
@@ -386,7 +386,7 @@ class Game:
             ]
             half = self.play_half(2, players=final_players)
             r.lost_by = half.lost_by
-            if _print_info:
+            if print_info:
                 print(
                     f"-> Final between {' and '.join([self.get_player_by_id(h).name for h in halves_lost_by])} lost by {self.get_player_by_id(r.lost_by).name}.\n"
                 )
@@ -396,3 +396,25 @@ class Game:
         self.rounds.append(r)
 
         return r
+
+    def play_rounds(
+        self,
+        num_rounds: int,
+        print_info: bool = False,
+    ) -> List[Round]:
+        """Play a specified number of rounds in the game.
+
+        Args:
+            num_rounds (int): The number of rounds to play.
+            print_info (bool): Whether to print detailed information about each round.
+
+        Returns:
+            List[Round]: A list of Round objects representing the played rounds.
+        """
+        rounds = []
+        for i in range(num_rounds):
+            r = self.play_round(round_index=i, print_info=print_info)
+            rounds.append(r)
+            self.rounds.append(r)
+
+        return rounds

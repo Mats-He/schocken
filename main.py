@@ -27,7 +27,7 @@ def main():
 
     # Play three rounds (each round is entirely independent)
     for i in range(3):
-        game.play_round(round_index=i, _print_info=True)
+        game.play_round(round_index=i, print_info=True)
 
     # Get the final scores after all rounds
     scores = game.get_scores()
