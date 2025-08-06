@@ -30,6 +30,10 @@ class Game:
         self.rounds: List[Round] = []
         self.last_mr: Optional[MiniRound] = None
 
+        self.current_r: Optional[Round] = None
+        self.current_h: Optional[Half] = None
+        self.current_mr: Optional[MiniRound] = None
+
     @property
     def pids(self) -> Optional[PlayerID]:
         """
@@ -186,29 +190,34 @@ class Game:
         if not mini_round_players:
             mini_round_players = self.players.copy()
 
-        mr = MiniRound(
+        self.current_mr = MiniRound(
             mini_round_players=mini_round_players, mini_round_index=mini_round_index
         )
-        if len(mr.mini_round_players) < 2 or len(mr.mini_round_players) > 50:
+        if (
+            len(self.current_mr.mini_round_players) < 2
+            or len(self.current_mr.mini_round_players) > 50
+        ):
             raise ValueError(
-                f"Too little or too many players to play round ({len(mr.mini_round_players)})."
+                f"Too little or too many players to play round ({len(self.current_mr.mini_round_players)})."
             )
         max_throws = 3
-        for i, player in enumerate(mr.mini_round_players):
+        for i, player in enumerate(self.current_mr.mini_round_players):
             turn = player.play_turn(max_throws=max_throws, turn_index=i, game=self)
             if i == 0:
                 max_throws = turn.num_throws  # use max throws of first player
             turn.final_hand.players_turn_ind = i
-            mr.turns.append(turn)
+            self.current_mr.turns.append(turn)
 
         # determine winner, loser and chips
-        mr.turns.sort()
-        mr.worst_turn = mr.turns[0]
-        mr.best_turn = mr.turns[-1]
-        mr.given_chips = mr.best_turn.final_hand.get_chip_count()
-        mr.lost_by = mr.worst_turn.player_id
+        self.current_mr.turns.sort()
+        self.current_mr.worst_turn = self.current_mr.turns[0]
+        self.current_mr.best_turn = self.current_mr.turns[-1]
+        self.current_mr.given_chips = (
+            self.current_mr.best_turn.final_hand.get_chip_count()
+        )
+        self.current_mr.lost_by = self.current_mr.worst_turn.player_id
 
-        return mr
+        return self.current_mr
 
     def play_half(
         self,
@@ -264,7 +273,7 @@ class Game:
         if print_info:
             print(f"\tPlaying half {halves_index}")
 
-        half = Half(halves_index=halves_index)
+        self.current_h = Half(halves_index=halves_index)
         mini_round_index = 0
         is_regular_half = False if halves_index == 2 else True
 
@@ -274,38 +283,40 @@ class Game:
             and isinstance(players, List)
             and all(isinstance(p, BasePlayer) for p in self.players)
         ):
-            half.active_players = players
+            self.current_h.active_players = players
             if is_regular_half:
                 raise Warning(
                     "Regular half (no final) is played with specific players, potentially not all."
                 )
         elif is_regular_half:
             # Normal half, no special player selection
-            half.active_players = self.players.copy()
+            self.current_h.active_players = self.players.copy()
         else:
             # halves_index is 2 (final half), but no players were submitted
             raise ValueError(
                 "Please either choose halves index of 0 or 1 OR provide a list of players for the final half."
             )
 
-        half.chip_manager.chip_balances = {p.id: 0 for p in half.active_players}
+        self.current_h.chip_manager.chip_balances = {
+            p.id: 0 for p in self.current_h.active_players
+        }
 
-        while not half.lost_by and mini_round_index < 10000:
+        while not self.current_h.lost_by and mini_round_index < 10000:
             # shifting players turns such that loser of last round starts
             if self.last_mr and (
                 is_regular_half or (not is_regular_half and mini_round_index > 0)
             ):
-                half.active_players = _change_starting_player(
-                    half.active_players, self.last_mr.lost_by
+                self.current_h.active_players = _change_starting_player(
+                    self.current_h.active_players, self.last_mr.lost_by
                 )
 
-            mr = self.play_mini_round(half.active_players, mini_round_index)
+            mr = self.play_mini_round(self.current_h.active_players, mini_round_index)
             mini_round_index += 1
 
             # end half if schock out occurs
             if mr.best_turn.final_hand.hand_type == HandType("Schock-out"):
-                half.lost_by = mr.lost_by
-                half.mini_rounds.append(mr)
+                self.current_h.lost_by = mr.lost_by
+                self.current_h.mini_rounds.append(mr)
                 self.last_mr = mr
                 if print_info:
                     print(
@@ -314,40 +325,40 @@ class Game:
                 break
 
             # distribute chips to loser
-            if not half.stock_chips_gone:
-                half.chip_manager.chips_in_stock -= mr.given_chips
-                if half.chip_manager.chips_in_stock <= 0:
-                    mr.given_chips -= abs(half.chip_manager.chips_in_stock)
-                    half.chip_manager.chips_in_stock = 0
-                    half.stock_chips_gone = True
+            if not self.current_h.stock_chips_gone:
+                self.current_h.chip_manager.chips_in_stock -= mr.given_chips
+                if self.current_h.chip_manager.chips_in_stock <= 0:
+                    mr.given_chips -= abs(self.current_h.chip_manager.chips_in_stock)
+                    self.current_h.chip_manager.chips_in_stock = 0
+                    self.current_h.stock_chips_gone = True
 
-            elif half.stock_chips_gone:
+            elif self.current_h.stock_chips_gone:
                 mr.given_chips = min(
                     mr.given_chips,
-                    half.chip_manager.chip_balances[mr.best_turn.player_id],
+                    self.current_h.chip_manager.chip_balances[mr.best_turn.player_id],
                 )
-                half.chip_manager.chip_balances[
+                self.current_h.chip_manager.chip_balances[
                     mr.best_turn.player_id
                 ] -= mr.given_chips
 
             # hand out chips to loser of mini round
-            half.chip_manager.chip_balances[mr.lost_by] += mr.given_chips
+            self.current_h.chip_manager.chip_balances[mr.lost_by] += mr.given_chips
 
-            if half.stock_chips_gone:
+            if self.current_h.stock_chips_gone:
                 # check if player is out
                 for p in mr.mini_round_players:
-                    chips = half.chip_manager.chip_balances[p.id]
+                    chips = self.current_h.chip_manager.chip_balances[p.id]
                     if chips == 0:
-                        half.active_players.remove(p)
+                        self.current_h.active_players.remove(p)
 
             # Add mini round to half
-            half.mini_rounds.append(mr)
+            self.current_h.mini_rounds.append(mr)
             self.last_mr = mr
 
             # Determine if a player has lost
-            for pid, chips in half.chip_manager.chip_balances.items():
+            for pid, chips in self.current_h.chip_manager.chip_balances.items():
                 if chips == 13:
-                    half.lost_by = pid
+                    self.current_h.lost_by = pid
                     if print_info:
                         print("\t\tHalf ended regularly")
                 elif chips > 13 or chips < 0:
@@ -357,9 +368,9 @@ class Game:
 
         if print_info:
             print(
-                f"\t\t-> Half ended after {mini_round_index} rounds. {self.get_player_by_id(half.lost_by).name} lost."
+                f"\t\t-> Half ended after {mini_round_index} rounds. {self.get_player_by_id(self.current_h.lost_by).name} lost."
             )
-        return half
+        return self.current_h
 
     def play_round(self, round_index=0, print_info: bool = False):
         """
@@ -379,21 +390,23 @@ class Game:
         if print_info:
             print(f"Playing round {round_index}")
 
-        r = Round(round_index)
+        self.current_r = Round(round_index)
         halves_lost_by = []
 
         for halves_index in range(2):
             half = self.play_half(halves_index, print_info=print_info)
-            r.halves.append(half)
+            self.current_r.halves.append(half)
             halves_lost_by.append(half.lost_by)
 
         assert len(halves_lost_by) == 2, "Not exactly two rounds were played."
 
         if len(set(halves_lost_by)) == 1:
             # player lost both rounds, so they lost entire round
-            r.lost_by = halves_lost_by[0]
+            self.current_r.lost_by = halves_lost_by[0]
             if print_info:
-                print(f"Round lost clean by {self.get_player_by_id(r.lost_by).name}\n")
+                print(
+                    f"Round lost clean by {self.get_player_by_id(self.current_r.lost_by).name}\n"
+                )
         elif len(set(halves_lost_by)) == 2:
             # play third half
             # assemble final players in the order [lost_first_half, lost_second_half], such that the loser of the first round starts the final
@@ -401,18 +414,18 @@ class Game:
                 next(p for p in self.players if p.id == pid) for pid in halves_lost_by
             ]
             half = self.play_half(2, players=final_players)
-            r.halves.append(half)
-            r.lost_by = half.lost_by
+            self.current_r.halves.append(half)
+            self.current_r.lost_by = half.lost_by
             if print_info:
                 print(
-                    f"-> Final between {' and '.join([self.get_player_by_id(h).name for h in halves_lost_by])} lost by {self.get_player_by_id(r.lost_by).name}.\n"
+                    f"-> Final between {' and '.join([self.get_player_by_id(h).name for h in halves_lost_by])} lost by {self.get_player_by_id(self.current_r.lost_by).name}.\n"
                 )
         else:
             raise ValueError(f"How tf did we get here?! {halves_lost_by}")
 
-        self.rounds.append(r)
+        self.rounds.append(self.current_r)
 
-        return r
+        return self.current_r
 
     def play_rounds(
         self,
