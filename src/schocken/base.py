@@ -12,12 +12,17 @@ class Die:
     visible: bool = False
     taken_out: bool = False
 
+    def __repr__(self):
+        """
+        Return a string representation of the Die object, showing its current value.
+        Useful for debugging and display purposes.
+        """
+        return f"Die({self.value})"
+
     def __post_init__(self):
         """
         Validate the die value after initialization.
         Ensures the die value is within the valid range (1-6) or is -1 (special case for game logic).
-        Raises:
-            ValueError: If the die value is not between 1 and 6 or -1 (special case).
         """
         if not (1 <= self.value <= 6) and not self.value == -1:
             raise ValueError("Die value must be between 1 and 6 or -1")
@@ -40,12 +45,14 @@ class Die:
         self.taken_out = False
         self.visible = False
 
-    def __repr__(self):
+    def copy(self) -> "Die":
         """
-        Return a string representation of the Die object, showing its current value.
-        Useful for debugging and display purposes.
+        Creates a copy of the die with the same value, visibility, and taken_out state.
+
+        Returns:
+            Die: A new Die object with the same attributes as the original.
         """
-        return f"Die({self.value})"
+        return Die(value=self.value, visible=self.visible, taken_out=self.taken_out)
 
 
 @dataclass
@@ -369,7 +376,7 @@ class Hand:
             Hand: A new Hand object with the same dice and state as the original.
         """
         new_hand = Hand()
-        new_hand.dice = [Die(die.value) for die in self._dice]
+        new_hand.dice = [die.copy() for die in self._dice]
         new_hand.put_together = self.put_together
         new_hand.players_turn_ind = self.players_turn_ind
         new_hand.finalized = self.finalized
