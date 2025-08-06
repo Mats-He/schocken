@@ -351,6 +351,16 @@ class Hand:
         self.finalized = False
         self.update()
 
+    def get_visible_dice(self) -> List[Die]:
+        """
+        Get a list of visible dice in the hand.
+        This is useful for displaying the hand state to players.
+
+        Returns:
+            List[Die]: A list of visible Die objects in the hand.
+        """
+        return [die for die in self.dice if die.visible]
+
     def copy(self) -> "Hand":
         """
         Creates a deep copy of the hand, including dice values and state flags.
@@ -480,8 +490,6 @@ class Hand:
             raise ValueError("Hand must contain exactly 3 dice to finalize")
         self.update()
         for die in self.dice:
-            # make all dice visible
-            die.visible = True
             if die.taken_out:
                 # mark hand as put together, if any die was taken_out
                 self.put_together = True
