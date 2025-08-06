@@ -244,9 +244,6 @@ class Game:
 
             Returns:
                 List[BasePlayer]: The reordered list of players.
-
-            Raises:
-                ValueError: If the starting player is not in the list.
             """
             # get all active player in initial order
             active_players_og_order = [
@@ -293,21 +290,23 @@ class Game:
 
         half.chip_manager.chip_balances = {p.id: 0 for p in half.active_players}
 
-        while half.lost_by == None and mini_round_index < 1000:
+        while not half.lost_by and mini_round_index < 10000:
             # shifting players turns such that loser of last round starts
-            if self.last_mr and is_regular_half:
+            if self.last_mr and (
+                is_regular_half or (not is_regular_half and mini_round_index > 0)
+            ):
                 half.active_players = _change_starting_player(
                     half.active_players, self.last_mr.lost_by
                 )
 
             mr = self.play_mini_round(half.active_players, mini_round_index)
+            mini_round_index += 1
 
             # end half if schock out occurs
             if mr.best_turn.final_hand.hand_type == HandType("Schock-out"):
                 half.lost_by = mr.lost_by
                 half.mini_rounds.append(mr)
                 self.last_mr = mr
-                mini_round_index += 1
                 if print_info:
                     print(
                         f"\t\tSchock out! by {self.get_player_by_id(mr.best_turn.player_id).name}."
@@ -355,8 +354,6 @@ class Game:
                     raise ValueError(
                         f"Player {pid} has {chips}, which should not be possible."
                     )
-
-            mini_round_index += 1
 
         if print_info:
             print(
