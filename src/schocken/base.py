@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from functools import total_ordering
 from typing import List, Optional, Tuple, Union
 from abc import ABC, abstractmethod
+from itertools import combinations_with_replacement
 
 
 @dataclass
@@ -98,7 +99,7 @@ class HandType:
             self.hand_type_value < 221 or self.hand_type_value > 665
         ):
             raise ValueError(
-                "hand_type_value must be between 221 and 665 for High Dice"
+                f"hand_type_value must be between 221 and 665 for High Dice: {self.hand_type_value}"
             )
 
     def __str__(self):
@@ -167,9 +168,7 @@ class Hand:
     _dice: List[Die] = field(default_factory=list)
     _hand_type: Optional[HandType] = field(default=None, init=False, repr=False)
     put_together: bool = False
-    players_turn_ind: int = (
-        0  # index of the players turn in the game, e.g. 1 (1st player), 2 (2nd player)
-    )
+    players_turn_ind: int = 0  # idx of players turn in a game, e.g. 2 (2nd player)
     finalized: bool = False
 
     def __post_init__(self):
@@ -199,8 +198,7 @@ class Hand:
             return self.hand_type < other.hand_type
 
     def __str__(self):
-        f = [d.value for d in self.dice]
-        return f"{f}"
+        return self.to_name()
 
     def __repr__(self):
         return (
@@ -210,75 +208,6 @@ class Hand:
             f"put_together={self.put_together}, "
             f"finalized={self.finalized})"
         )
-
-    @staticmethod
-    def get_all_possible_hands(
-        return_names: bool = False,
-    ) -> Union[List["Hand"], List[str]]:
-        """
-        Returns all possible unique hands sorted by rank (worst to best).
-        Useful for generating all hand types for game logic, testing, or statistics.
-
-        Args:
-            return_names (bool): Whether to return names of the hands instead of the hand themselves. Defaults to False
-
-        Returns:
-            List[Hand]: All unique hand combinations possible in the game.
-        """
-        from itertools import combinations_with_replacement
-
-        possible_hands = []
-        # All combinations of 3 dice values (1-6), order doesn't matter
-        for combo in combinations_with_replacement(range(1, 7), 3):
-            # Generate all unique permutations for this combo (to cover all dice orders)
-            # But only add one Hand per sorted combo (since order doesn't matter for hand type)
-            dice = [Die(value=v) for v in sorted(combo, reverse=True)]
-            hand = Hand()
-            hand.dice = dice
-            hand.update()
-            hand2 = hand.copy()
-            hand2.put_together = True
-            hand2.update()
-            # Avoid duplicates by hand type and dice values
-            if not any(
-                h.hand_type.internal_rank == hand.hand_type.internal_rank
-                for h in possible_hands
-            ):
-                possible_hands.append(hand)
-            if not any(
-                h.hand_type.internal_rank == hand2.hand_type.internal_rank
-                for h in possible_hands
-            ):
-                possible_hands.append(hand2)
-
-        possible_hands.sort()
-        if return_names:
-            possible_hands = [hand.to_name() for hand in possible_hands]
-
-        return possible_hands
-
-    @staticmethod
-    def from_str(s: str) -> "Hand":
-        """
-        Create a Hand from a string representation, e.g., '[5, 4, 4]'.
-
-        Args:
-            s (str): String representation of dice values.
-
-        Returns:
-            Hand: The constructed Hand object.
-
-        Raises:
-            ValueError: If the string does not represent exactly 3 dice values.
-        """
-        values = eval(s)
-        if len(values) != 3:
-            raise ValueError("Hand string must contain exactly 3 dice values")
-        dice = [Die(value=v) for v in values]
-        hand = Hand()
-        hand.dice = dice
-        hand.update()
-        return hand
 
     @property
     def dice(self) -> List[Die]:
@@ -306,6 +235,50 @@ class Hand:
             "hand_type attribute should't be set directly. It is calculated based on the dice in the hand"
         )
 
+    @staticmethod
+    def get_all_possible_hands(
+        return_names: bool = False,
+    ) -> Union[List["Hand"], List[str]]:
+        """
+        Returns all possible unique hands sorted by rank (worst to best).
+        Useful for generating all hand types for game logic, testing, or statistics.
+
+        Args:
+            return_names (bool): Whether to return names of the hands instead of the hand themselves. Defaults to False
+
+        Returns:
+            Union[List[Hand], List[str]]: All unique hand combinations possible in the game as Hand objects or names.
+        """
+        possible_hands: List[Hand] = []
+        # All combinations of 3 dice values (1-6), order doesn't matter
+        for combo in combinations_with_replacement(range(1, 7), 3):
+            # Generate all unique permutations for this combo (to cover all dice orders)
+            dice = [Die(value=v) for v in sorted(combo, reverse=True)]
+            hand = Hand()
+            hand.dice = dice
+            hand.update()
+            # Create a copy of the hand for the put_together variant
+            hand2 = hand.copy()
+            hand2.put_together = True
+            hand2.update()
+            # Avoid duplicates by hand type and dice values
+            if not any(
+                h.hand_type.internal_rank == hand.hand_type.internal_rank
+                for h in possible_hands
+            ):
+                possible_hands.append(hand)
+            if not any(
+                h.hand_type.internal_rank == hand2.hand_type.internal_rank
+                for h in possible_hands
+            ):
+                possible_hands.append(hand2)
+
+        possible_hands.sort()
+        if return_names:
+            possible_hands = [hand.to_name() for hand in possible_hands]
+
+        return possible_hands
+
     def to_name(self) -> str:
         """
         Return a human-readable name for the hand, based on its type and value.
@@ -330,6 +303,44 @@ class Hand:
                 name = "Motte"
         return name
 
+    @classmethod
+    def from_name(cls, name: str) -> "Hand":
+        """
+        Create a Hand instance from a name string.
+
+        Args:
+            name (str): The name of the hand (e.g., 'Schock-5', 'General-4', 'Straight-2:4').
+
+        Returns:
+            Hand: The constructed Hand object.
+        """
+        hand = cls()
+        if name == "Motte":
+            hand.dice = [Die(1), Die(2), Die(2)]
+        elif "Schock-out" in name:
+            hand.dice = [Die(1), Die(1), Die(1)]
+        elif "Schock-" in name:
+            value = int(name.split("-")[1])
+            hand.dice = [Die(1), Die(1), Die(value)]
+        elif "General-" in name:
+            value = int(name.split("-")[1])
+            hand.dice = [Die(value), Die(value), Die(value)]
+        elif "Straight-" in name:
+            parts = name.split("-")[1].split(":")
+            value = int(parts[0])
+            hand.dice = [Die(value), Die(value + 1), Die(value + 2)]
+        elif "-" in name:
+            values = "".join(name.split("-"))
+            assert len(values) == 3, f"Invalid hand name format: {name}"
+            hand.dice = [Die(int(v)) for v in values]
+            if "1" in values:
+                hand.put_together = True
+        else:
+            raise ValueError(f"Unknown hand type: {name}")
+
+        hand.update()
+        return hand
+
     def initialize(self):
         """
         Initialize the hand with three new dice and reset its state.
@@ -337,7 +348,6 @@ class Hand:
         """
         self.dice = [Die() for _ in range(3)]
         self.put_together = False
-        # players_turn_ind
         self.finalized = False
         self.update()
 
@@ -495,6 +505,15 @@ class Turn:
     player_id: Optional[PlayerID] = field(default=None, compare=False)
     final_hand: Optional[Hand] = field(default=None, compare=True)
     num_throws: int = field(default=0, compare=False)
+
+    def to_json(self) -> dict:
+        """Convert the turn state to a JSON-serializable dictionary."""
+        return {
+            "turn_index": self.turn_index,
+            "player_id": str(self.player_id) if self.player_id else None,
+            "final_hand": self.final_hand.to_name() if self.final_hand else None,
+            "num_throws": self.num_throws,
+        }
 
 
 class BasePlayer(ABC):
@@ -713,6 +732,15 @@ class ChipManager:
     chips_in_stock: int = 13
     chip_balances: dict = field(default_factory=dict)
 
+    def to_json(self) -> dict:
+        """Convert the chip manager state to a JSON-serializable dictionary."""
+        return {
+            "chips_in_stock": self.chips_in_stock,
+            "chip_balances": {
+                str(pid): balance for pid, balance in self.chip_balances.items()
+            },
+        }
+
 
 @dataclass
 class MiniRound:
@@ -724,6 +752,20 @@ class MiniRound:
     given_chips: int = 0
     lost_by: Optional[PlayerID] = None
 
+    def to_json(self) -> dict:
+        """Convert the mini round state to a JSON-serializable dictionary."""
+        return {
+            "mini_round_players": [
+                f"{p.name}({p.id})" for p in self.mini_round_players
+            ],
+            "mini_round_index": self.mini_round_index,
+            "worst_turn": self.worst_turn.to_json() if self.worst_turn else None,
+            "best_turn": self.best_turn.to_json() if self.best_turn else None,
+            "given_chips": self.given_chips,
+            "lost_by": str(self.lost_by) if self.lost_by else None,
+            "turns": [turn.to_json() for turn in self.turns],
+        }
+
 
 @dataclass
 class Half:
@@ -734,9 +776,28 @@ class Half:
     stock_chips_gone: bool = False
     chip_manager: Optional[ChipManager] = field(default_factory=ChipManager)
 
+    def to_json(self) -> dict:
+        """Convert the half state to a JSON-serializable dictionary."""
+        return {
+            "halves_index": self.halves_index,
+            "active_players": [str(player.id) for player in self.active_players],
+            "mini_rounds": [mr.to_json() for mr in self.mini_rounds],
+            "lost_by": str(self.lost_by) if self.lost_by else None,
+            "stock_chips_gone": self.stock_chips_gone,
+            "chip_manager": self.chip_manager.to_json(),
+        }
+
 
 @dataclass
 class Round:
     round_index: int = 0
     halves: List[Half] = field(default_factory=list)
     lost_by: Optional[PlayerID] = None
+
+    def to_json(self) -> dict:
+        """Convert the round state to a JSON-serializable dictionary."""
+        return {
+            "round_index": self.round_index,
+            "halves": [half.to_json() for half in self.halves],
+            "lost_by": str(self.lost_by) if self.lost_by else None,
+        }

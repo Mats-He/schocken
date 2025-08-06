@@ -5,7 +5,6 @@ from schocken.base import (
     PlayerID,
     Round,
     MiniRound,
-    Turn,
     Half,
 )
 
@@ -92,10 +91,13 @@ class Game:
                 return player
         raise ValueError(f"No player found with id={pid}")
 
-    def _calculate_scores(self):
+    def _calculate_scores(self, condensed_hands: bool = True):
         """
         Calculate and update the scores for all players based on rounds, halves, and mini-rounds lost.
         Updates the self.scores dictionary with the latest statistics.
+
+        Args:
+            condensed_hands (bool): If True, condense hands into histogram instead of list.
         """
         all_rounds_lost = {pid: 0 for pid in self.pids}
         all_halves_lost = {pid: 0 for pid in self.pids}
@@ -109,8 +111,16 @@ class Game:
                 for mr in h.mini_rounds:
                     all_minirounds_lost[mr.lost_by] += 1
                     for t in mr.turns:
-                        all_players_hands[t.player_id].append(str(t.final_hand))
-
+                        all_players_hands[t.player_id].append(t.final_hand.to_name())
+        if condensed_hands:
+            # condense hands into histogram
+            for pid, hands in all_players_hands.items():
+                hand_histogram = {}
+                for hand in hands:
+                    if hand not in hand_histogram:
+                        hand_histogram[hand] = 0
+                    hand_histogram[hand] += 1
+                all_players_hands[pid] = hand_histogram
         score_register = {
             "rounds_lost": all_rounds_lost,
             "halves_lost": all_halves_lost,
@@ -144,6 +154,15 @@ class Game:
             else:
                 raise ValueError(f"score type not supported... ({type(score_dict)})")
         return scores
+
+    def to_json(self):
+        """Convert the game state to a JSON-serializable dictionary."""
+        return {
+            "players": [f"{p.name} ({p.id})" for p in self.players],
+            "scores": self.get_scores(),
+            "rounds": [r.to_json() for r in self.rounds],
+            "last_mr": self.last_mr.to_json() if self.last_mr else None,
+        }
 
     def play_mini_round(
         self,

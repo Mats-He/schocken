@@ -92,3 +92,12 @@ def test_turn_sorting():
     assert turns[0] == turn1
     assert turns[1] == turn3
     assert turns[2] == turn2
+
+
+def test_from_name():
+    all_hand_names = Hand.get_all_possible_hands(return_names=True)
+    for i, name in enumerate(all_hand_names):
+        print(f"Testing hand name: {name} ({i+1}/{len(all_hand_names)})")
+        hand = Hand.from_name(name)
+        assert hand.to_name() == name, f"Failed for hand name: {name}"
+        assert isinstance(hand, Hand), f"Failed type check for hand name: {name}"

@@ -1,3 +1,5 @@
+import json
+
 try:
     from schocken.custom_player import Player
     from schocken.game import Game
@@ -26,8 +28,12 @@ def main():
     game.add_player([p1, p2, p3])
 
     # Play three rounds (each round is entirely independent)
-    for i in range(3):
+    for i in range(300):
         game.play_round(round_index=i, print_info=True)
+
+    with open("game_state.json", "w") as f:
+
+        json.dump(game.to_json(), f, indent=4)
 
     # Get the final scores after all rounds
     scores = game.get_scores()
