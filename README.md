@@ -8,6 +8,26 @@ Schocken is a modern Python implementation of the traditional dice game "Schocke
 - Track detailed game statistics (rounds, halves, mini-rounds, turns/throws)
 - Extensible codebase for further development/analysis
 
+## Project Structure
+```
+main.py                # Example for running the game
+src/schocken/          # Core game logic and player classes
+    base.py            # Abstract base player class
+    custom_player.py   # Example custom player implementation
+    game.py            # Game logic and management
+
+LICENSE                # License information
+pyproject.toml         # Project metadata
+pytest.ini             # Pytest configuration
+README.md              # Project documentation
+
+tests/                 # Unit tests for game logic
+    test_base.py       # Tests for base player
+    test_game.py       # Tests for game logic
+    test_hands.py      # Tests for hand evaluation
+    test_player.py     # Tests for player classes
+```
+
 ## Installation
 1. Clone the repository:
    ```bash
@@ -115,6 +135,23 @@ Mini-rounds: ['mini_round_players', 'mini_round_index', 'turns', 'worst_turn', '
 Turns: ['turn_index', 'player_id', 'final_hand']
 ```
 
+## Development & Testing
+For quick development/debugging, use pip install in editable mode:
+```bash
+uv pip install -e .
+```
+Instead of building the package, this creates a reference to the current directory, allowing to modify and test the code without reinstalling.
+
+To run tests, use:
+```bash
+pytest tests/
+```
+`-v` for verbose output, `-s` to see print statements.
+
+## Customization
+You can create your own player strategies by subclassing the `BasePlayer` class in `base.py`. See `custom_player.py` for an example.
+
+
 ## Design Decisions
 - The game class (`Game`) manages the game flow, including rounds, halves, mini-rounds and points. The player class (`BasePlayer`) only defines the interface for player strategies, the rest is taken care of by the game instance. Thus, scores, points, chips etc. are all part of the game or its related data objects (Round, Half, Turn etc.) and not the player instances.
 - The game was built for the main purpose of simulation and analysis. It is therefore at this point not designed for real-time interaction, but rather for running simulations and analyzing the results.
@@ -124,31 +161,6 @@ Turns: ['turn_index', 'player_id', 'final_hand']
 - game.py: Implement async functionality for real-time multiplayers
 - Add a GUI/web interface for real-time multiplayer interaction/visualization
 - Add a rulebook for the current implementation of the game (there might exist multiple variants of the game)
-
-## Project Structure
-```
-main.py                # Entry point for running the game
-src/schocken/          # Core game logic and player classes
-    base.py            # Abstract base player class
-    custom_player.py   # Example custom player implementation
-    game.py            # Game logic and management
-    __init__.py        # Package initialization
-    __pycache__/       # Python cache files
-
-LICENSE                # License information
-pyproject.toml         # Project metadata
-README.md              # Project documentation
-
-tests/                 # Unit tests for game logic
-    test_base.py       # Tests for base player
-    test_game.py       # Tests for game logic
-    test_hands.py      # Tests for hand evaluation
-    __init__.py        # Test package initialization
-    __pycache__/       # Test cache files
-```
-
-## Customization
-You can create your own player strategies by subclassing the `BasePlayer` class in `base.py`. See `custom_player.py` for an example.
 
 ## License
 This project is licensed under the MIT License. See `LICENSE` for details.
