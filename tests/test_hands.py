@@ -1,4 +1,3 @@
-import pytest
 from src.schocken.base import Hand, Die, Turn, MiniRound
 from src.schocken.game import Game
 from src.schocken.custom_player import Player
