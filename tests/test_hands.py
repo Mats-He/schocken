@@ -1,6 +1,6 @@
-from src.schocken.base import Hand, Die, Turn, MiniRound
-from src.schocken.game import Game
-from src.schocken.custom_player import Player
+from schocken.base import Hand, Die, Turn, MiniRound
+from schocken.game import Game
+from schocken.custom_player import Player
 
 
 def test_hand_sorting():

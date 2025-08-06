@@ -1,5 +1,5 @@
 import pytest
-from src.schocken.base import (
+from schocken.base import (
     Die,
     HandType,
     Hand,

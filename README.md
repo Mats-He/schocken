@@ -60,6 +60,10 @@ The game is organized in units called rounds, halves, mini-rounds and turns.
 
 All units can be played individually, however, the default would be to play an arbitrary number of rounds.
 ```python
+# default option for playing the game
+rounds = game.play_rounds(num_rounds=3)
+
+# playing individual units of the game
 r = game.play_round()
 h = game.play_half()
 mr = game.play_mini_round()

@@ -1,6 +1,6 @@
 import pytest
-from src.schocken.game import Game
-from src.schocken.base import BasePlayer, PlayerID
+from schocken.game import Game
+from schocken.base import BasePlayer, PlayerID
 
 
 class DummyPlayer(BasePlayer):

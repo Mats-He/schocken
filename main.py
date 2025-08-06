@@ -1,11 +1,6 @@
 import json
-
-try:
-    from schocken.custom_player import Player
-    from schocken.game import Game
-except ModuleNotFoundError:
-    from src.schocken.custom_player import Player
-    from src.schocken.game import Game
+from schocken.custom_player import Player
+from schocken.game import Game
 
 
 def main():
@@ -28,11 +23,10 @@ def main():
     game.add_player([p1, p2, p3])
 
     # Play three rounds (each round is entirely independent)
-    for i in range(300):
-        game.play_round(round_index=i, print_info=True)
+    rounds = game.play_rounds(num_rounds=3, print_info=True)
 
+    # Save the game state to a JSON file
     with open("game_state.json", "w") as f:
-
         json.dump(game.to_json(), f, indent=4)
 
     # Get the final scores after all rounds
