@@ -551,12 +551,13 @@ class BasePlayer(ABC):
 
     @abstractmethod
     def eval_hand_and_throw(
-        self, current_hand: Hand, *args, **kwargs
+        self, current_hand: Hand, max_throws: int, *args, **kwargs
     ) -> Tuple[bool, Hand]:
         """Example implementation of the Player logic: Evaluating current hand and throwing again if they decide to
 
         Args:
             current_hand (Hand): The player's current hand to evaluate.
+            max_throws (int): Maximum number of throws allowed in a turn.
             *args: Additional positional arguments (unused).
             **kwargs: Additional keyword arguments (unused). (e.g. game state)
 
@@ -595,7 +596,7 @@ class BasePlayer(ABC):
 
             # Evaluate hand and throw again if needed
             end_turn, new_hand = self.eval_hand_and_throw(
-                current_hand=current_hand, **kwargs
+                current_hand=current_hand, max_throws=max_throws, **kwargs
             )
             if end_turn:
                 break
@@ -769,7 +770,11 @@ class MiniRound:
 
     def get_visible_hands(self) -> List[List[Die]]:
         """Get a list of visible hands from the mini round players."""
-        return [player.hand.get_visible_dice() for player in self.mini_round_players]
+        # TODO: Add option to give player instance to return visible hands from that players perspective?
+        return {
+            player.id: player.hand.get_visible_dice()
+            for player in self.mini_round_players
+        }
 
     def to_json(self) -> dict:
         """Convert the mini round state to a JSON-serializable dictionary."""
