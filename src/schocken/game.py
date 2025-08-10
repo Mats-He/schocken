@@ -201,6 +201,9 @@ class Game:
                 f"Too little or too many players to play round ({len(self.current_mr.mini_round_players)})."
             )
         max_throws = 3
+        # Initialize each player's hand
+        for player in self.current_mr.mini_round_players:
+            player.hand.initialize()
         for i, player in enumerate(self.current_mr.mini_round_players):
             turn = player.play_turn(max_throws=max_throws, turn_index=i, game=self)
             if i == 0:

@@ -358,7 +358,7 @@ class Hand:
         self.finalized = False
         self.update()
 
-    def get_visible_dice(self) -> List[Die]:
+    def get_visible_dice(self) -> Union[List[Die], None]:
         """
         Get a list of visible dice in the hand.
         This is useful for displaying the hand state to players.
@@ -366,7 +366,11 @@ class Hand:
         Returns:
             List[Die]: A list of visible Die objects in the hand.
         """
-        return [die for die in self.dice if die.visible]
+        if not self.finalized:
+            return None
+        else:
+            visible_dice = [die for die in self.dice if die.visible]
+        return visible_dice
 
     def copy(self) -> "Hand":
         """
