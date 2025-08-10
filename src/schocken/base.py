@@ -774,11 +774,17 @@ class MiniRound:
     lost_by: Optional[PlayerID] = None
 
     def get_visible_hands(self) -> List[Union[List[Die], None]]:
-        """Get a list of visible hands from the mini round players."""
-        # TODO: Add option to give player instance to return visible hands from that players perspective?
+        """Get a list of all visible hands from the mini round players."""
         return [
             {player.id: player.hand.get_visible_dice()}
             for player in self.mini_round_players
+        ]
+
+    def get_visible_hands_for_player(self, pid: PlayerID) -> Union[List[Die], None]:
+        """Get a list of visible hands from a specific player's view, i.e. all players before the given player excluding the given player."""
+        return [
+            {player.id: player.hand.get_visible_dice()}
+            for player in self.mini_round_players[: self.mini_round_players.index(pid)]
         ]
 
     def to_json(self) -> dict:
