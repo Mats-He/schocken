@@ -771,10 +771,10 @@ class MiniRound:
     def get_visible_hands(self) -> List[List[Die]]:
         """Get a list of visible hands from the mini round players."""
         # TODO: Add option to give player instance to return visible hands from that players perspective?
-        return {
-            player.id: player.hand.get_visible_dice()
+        return [
+            {player.id: player.hand.get_visible_dice()}
             for player in self.mini_round_players
-        }
+        ]
 
     def to_json(self) -> dict:
         """Convert the mini round state to a JSON-serializable dictionary."""
