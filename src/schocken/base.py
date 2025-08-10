@@ -361,10 +361,11 @@ class Hand:
     def get_visible_dice(self) -> Union[List[Die], None]:
         """
         Get a list of visible dice in the hand.
-        This is useful for displaying the hand state to players.
+        None is returned when player hasnt played yet, i.e. hand is not finalized.
+        An empty list is returned if the hand has no visible dice. ("3 Dunkel")
 
         Returns:
-            List[Die]: A list of visible Die objects in the hand.
+            Union[List[Die], None]: A list of visible dice if the hand is finalized, otherwise None.
         """
         if not self.finalized:
             return None
@@ -772,7 +773,7 @@ class MiniRound:
     given_chips: int = 0
     lost_by: Optional[PlayerID] = None
 
-    def get_visible_hands(self) -> List[List[Die]]:
+    def get_visible_hands(self) -> List[Union[List[Die], None]]:
         """Get a list of visible hands from the mini round players."""
         # TODO: Add option to give player instance to return visible hands from that players perspective?
         return [
