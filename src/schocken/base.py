@@ -779,7 +779,6 @@ class MiniRound:
         return [
             {player.id: player.hand.get_visible_dice()}
             for player in self.mini_round_players
-            if player.hand.get_visible_dice()
         ]
 
     def to_json(self) -> dict:
