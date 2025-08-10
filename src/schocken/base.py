@@ -778,13 +778,6 @@ class MiniRound:
         return [
             {player.id: player.hand.get_visible_dice()}
             for player in self.mini_round_players
-        ]
-
-    def get_visible_hands_for_player(self, pid: PlayerID) -> Union[List[Die], None]:
-        """Get a list of visible hands from a specific player's view, i.e. all players before the given player excluding the given player."""
-        return [
-            {player.id: player.hand.get_visible_dice()}
-            for player in self.mini_round_players
             if player.hand.get_visible_dice()
         ]
 
